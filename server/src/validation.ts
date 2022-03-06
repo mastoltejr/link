@@ -8,6 +8,16 @@ const passwordRegex = new RegExp(
   /^(?=(.*[a-z]){3,})(?=(.*[A-Z]){2,})(?=(.*[0-9]){2,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$/
 );
 
+const urlRegex = new RegExp(
+  '^(https?:\\/\\/)?' + // protocol
+    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+    '(\\#[-a-z\\d_]*)?$',
+  'i'
+); // fragment locator
+
 export const anyErrors = <T extends Object>(errors: Validation<T>): boolean => {
   return Object.values(errors).some((e) => e !== undefined);
 };
@@ -25,6 +35,8 @@ export const isUnique: Validator = (
     : undefined;
 export const isEmail: Validator = (value: any) =>
   emailRegex.test(String(value)) ? undefined : 'Not a valid email';
+export const isURL: Validator = (value: any) =>
+  urlRegex.test(String(value)) ? undefined : 'Not a valid URL';
 export const strongPassword: Validator = (value: any) =>
   passwordRegex.test(String(value))
     ? undefined

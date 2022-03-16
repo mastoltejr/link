@@ -37,6 +37,27 @@ app.use(
   })
 );
 
+app.get('/:link', async (req, res, next) => {
+  const link = req.params.link;
+  const foundLink = await prisma.link.findUnique({ where: { link } });
+
+  if (foundLink) {
+    if (foundLink.active === false) {
+      return res.status(400).send('Inactive Link');
+    }
+    prisma.link.update({
+      where: { id: foundLink.id },
+      data: {
+        followCount: foundLink.followCount + 1,
+        lastUsed: new Date()
+      }
+    });
+    return res.redirect(foundLink.url);
+  }
+
+  return res.status(400).send('Link does not exist');
+});
+
 app.post('/createLink', async (req, res, next) => {
   console.log(req.body);
   const { url, oldLinkId } = req.body;
@@ -53,7 +74,8 @@ app.post('/createLink', async (req, res, next) => {
   const newLink = await prisma.link.create({
     data: {
       link: nanoid(8),
-      url
+      url,
+      lastUsed: new Date()
     }
   });
   if (oldLinkId !== undefined)
